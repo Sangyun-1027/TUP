@@ -140,3 +140,9 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),   # 기본 1일 → 7일로 연장
     # 그 외 옵션들 필요하면 추가 가능
 }
+
+TIME_ZONE = 'Asia/Seoul'  # 한국 시간 기준
+USE_TZ = True              # 타임존 사용 활성화\
+
+AUTH_USER_MODEL = 'myapp.MyUser'
+
