@@ -3,6 +3,8 @@ from .models import UserProfile, Team, Application, Invitation
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from .models import Ticket
+
 
 User = get_user_model()
 
@@ -47,3 +49,9 @@ class TeamSerializer(serializers.ModelSerializer):
             'id', 'name', 'leader', 'tech', 'looking_for', 'max_members',
             'status', 'members', 'applications', 'invitations'
         ]
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ['id', 'type', 'used', 'redeemed_at', 'expires_at']

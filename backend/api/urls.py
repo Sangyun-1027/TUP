@@ -6,6 +6,7 @@ from .views import (
     ApplicantFilterView
 )
 from .views import UserProfileUpdateView
+from .views import UsePinTicketView
 
 
 urlpatterns = [
@@ -32,4 +33,6 @@ urlpatterns = [
     # 프로필 업데이트
     path('profile/update/', UserProfileUpdateView.as_view(), name='userprofile-update'),
     
+    # 리워드 티켓 사용
+    path('teams/<int:team_id>/use-pin/', UsePinTicketView.as_view(), name='use-pin-ticket'),
 ]

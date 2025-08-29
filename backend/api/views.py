@@ -3,10 +3,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
+from django.db.models import OuterRef, Subquery, DateTimeField
+from django.utils import timezone
+from datetime import timedelta
+from .serializers import UserProfileSerializer
 
-from .models import Team, User, Application, Invitation
+from .models import Team, User, Application, Invitation, UserProfile, TeamPin, Ticket
 from .serializers import TeamSerializer, UserSerializer
-from .models import UserProfile
 from .serializers import InvitationSerializer
 
 
@@ -55,7 +58,7 @@ class TeamCreateView(APIView):
         try:
             team = Team.objects.create(
                 name=name,
-                leader=user_profile,
+                leader_id=user_profile,
                 tech=tech,
                 looking_for=looking_for,
                 max_members=max_members,
@@ -83,8 +86,8 @@ class UserProfileUpdateView(APIView):
         data = request.data
         profile.skills = data.get('skills', profile.skills)
         profile.keywords = data.get('keywords', profile.keywords)
-        profile.mainRole = data.get('mainRole', profile.mainRole)
-        profile.subRole = data.get('subRole', profile.subRole)
+        profile.main_role = data.get('mainRole', profile.main_role)
+        profile.sub_role = data.get('subRole', profile.sub_role)
         profile.save()
 
         return Response({
@@ -159,7 +162,7 @@ class AcceptApplicationView(APIView):
         app = get_object_or_404(Application, id=application_id)
 
         # 권한 체크: 팀 리더만 가능
-        if app.team.leader != request.user.userprofile:
+        if app.team.leader_id != request.user.userprofile:
             return Response({'error': '권한 없음'}, status=403)
 
         # 팀원 추가 및 상태 변경
@@ -182,7 +185,7 @@ class RejectApplicationView(APIView):
         app = get_object_or_404(Application, id=application_id)
 
         # 권한 체크: 팀 리더만 가능
-        if app.team.leader != request.user.userprofile:
+        if app.team.leader_id != request.user.userprofile:
             return Response({'error': '권한 없음'}, status=403)
 
         # 상태 변경
@@ -204,11 +207,11 @@ class InviteUserView(APIView):
         team = get_object_or_404(Team, id=team_id)
 
         # 권한 체크: 팀 리더만 가능
-        if team.leader.user != request.user.userprofile:
+        if team.leader_id.user != request.user.userprofile:
             return Response({'error': '권한 없음'}, status=403)
 
         # 초대할 사용자 프로필 가져오기
-        user_profile = get_object_or_404(UserProfile, user__id=request.data['user_id'])
+        user_profile = get_object_or_404(UserProfile, user_id=request.data['user_id'])
 
         # 초대 생성
         Invitation.objects.create(team=team, user=user_profile, status='pending')
@@ -219,28 +222,36 @@ class InviteUserView(APIView):
         }, status=200)
 
 
-# 9. 팀 리스트 (리워드 우선 정렬)
+# 9. 팀 리스트 (핀 사용팀 상단 고정)
 class TeamListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        teams = Team.objects.prefetch_related('members').select_related('leader').all()
-        team_with_flags = []
+        qs = Team.objects.prefetch_related('members').select_related('leader')
 
-        for team in teams:
-            # 리더 또는 팀원 중 한 명이라도 리워드가 있는지 확인
-            has_reward = team.leader.has_reward or any(m.has_reward for m in team.members.all())
-            team_with_flags.append((has_reward, team))
+        now = timezone.now()
 
-        # 리워드 우선 정렬 (리워드 있는 팀이 먼저, 그 다음 ID 순)
-        sorted_teams = sorted(team_with_flags, key=lambda x: (not x[0], x[1].id))
-        sorted_team_objects = [t[1] for t in sorted_teams]
+        # 각 팀별로 만료되지 않은 가장 최신 TeamPin 조회
+        latest_pin_sq = TeamPin.objects.filter(
+            team=OuterRef('pk'),
+            active=True,
+            expires_at__gt=now
+        ).order_by('-expires_at').values('expires_at')[:1]
 
-        serializer = TeamSerializer(sorted_team_objects, many=True)
+        qs = qs.annotate(
+            pin_until=Subquery(latest_pin_sq, output_field=DateTimeField())
+        ).order_by(
+            '-pin_until',  # pin 있는 팀 우선
+            'id'           # 동일 조건일 경우 id 오름차순
+        )
+
+        serializer = TeamSerializer(qs, many=True)
         return Response({
-            "message": "팀 목록을 리워드 우선으로 정렬하여 반환합니다.",
+            "message": "팀 목록을 상단 고정권(24h) 기준으로 정렬합니다.",
             "teams": serializer.data
         }, status=200)
+
+
 
 
 # 10. 팀 상세
@@ -277,29 +288,88 @@ class MyApplicationsView(APIView):
         return Response(data)
 
 
-# 13. 역할·기술·평점 필터링
+# 13. 유저 필터링 
 class ApplicantFilterView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # 쿼리 파라미터
         role = request.query_params.get('role', '')
+        sub_role = request.query_params.get('sub_role', '')
         skill = request.query_params.get('skill', '')
+        keyword = request.query_params.get('keyword', '')
         min_rating = request.query_params.get('min_rating', '')
+        min_participation = request.query_params.get('min_participation', '')
+        has_reward = request.query_params.get('has_reward', '')  # 'true' or 'false'
+        is_leader = request.query_params.get('is_leader', '')      # 'true' or 'false'
 
-        users = User.objects.all()
+        users = UserProfile.objects.all()  # UserProfile 기준으로 조회
 
+        # 필터 적용
         if role:
             users = users.filter(mainRole__icontains=role)
+
+        if sub_role:
+            users = users.filter(subRole__icontains=sub_role)
 
         if skill:
             users = users.filter(skills__icontains=skill)
 
+        if keyword:
+            users = users.filter(keywords__icontains=keyword)
+
         if min_rating:
             try:
-                min_rating = float(min_rating)
-                users = users.filter(rating__gte=min_rating)
+                users = users.filter(rating__gte=float(min_rating))
             except ValueError:
                 pass
 
-        serializer = UserSerializer(users, many=True)
+        if min_participation:
+            try:
+                users = users.filter(participation__gte=int(min_participation))
+            except ValueError:
+                pass
+
+        if has_reward.lower() == 'true':
+            users = users.filter(has_reward=True)
+        elif has_reward.lower() == 'false':
+            users = users.filter(has_reward=False)
+
+        serializer = UserProfileSerializer(users, many=True)  # UserSerializer → UserProfileSerializer
         return Response(serializer.data)
+    
+    
+
+# 14. 팀 리더가 핀 티켓 사용
+class UsePinTicketView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, team_id):
+        team = get_object_or_404(Team, id=team_id)
+        profile = request.user.userprofile
+
+        # 팀 리더만 사용 가능
+        if team.leader_id != profile:
+            return Response({"error": "팀 리더만 핀 티켓을 사용할 수 있습니다."}, status=403)
+
+        # 사용 가능한 티켓 조회 (예: Ticket 모델에서)
+        ticket = Ticket.objects.filter(user_profile=profile, type='pin', used=False).first()
+        if not ticket:
+            return Response({"error": "사용 가능한 핀 티켓이 없습니다."}, status=400)
+
+        # 티켓 사용 처리
+        ticket.used = True
+        ticket.redeemed_at = timezone.now()
+        ticket.expires_at = timezone.now() + timedelta(hours=24)
+        ticket.save()
+
+        # 기존 활성 TeamPin 비활성화
+        TeamPin.objects.filter(team=team, active=True, expires_at__gt=timezone.now()).update(active=False)
+
+        # 새 TeamPin 생성
+        TeamPin.objects.create(team=team, user=profile, active=True, expires_at=ticket.expires_at)
+
+        return Response({
+            "message": f"팀 '{team.name}'이(가) 24시간 상단 고정되었습니다.",
+            "pinned_until": ticket.expires_at
+        }, status=200)
