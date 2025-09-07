@@ -1,0 +1,587 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', sans-serif;
+  height: auto !important;
+  min-height: 100%;
+}
+.team-matching-container {
+  font-family: 'Montserrat', 'Noto Sans KR', sans-serif;
+  background-color: #f5f6f8;
+  min-height: 100vh;
+}
+
+.team-matching-header {
+  background: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+
+.team-matching-header .logo {
+  font-size: 2.3rem;
+  font-weight: 900;
+  color: #FF6B35;
+  letter-spacing: 0.1em;
+}
+
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.matching-intro {
+  animation: fadeSlideUp 0.7s ease-out;
+  animation-delay: 0.1s;
+  animation-fill-mode: both;
+  margin-top: 1rem;
+  padding: 2rem 3rem;
+}
+
+.matching-intro h1 {
+  animation: fadeSlideUp 0.9s ease-out;
+  animation-delay: 0.3s;
+  animation-fill-mode: both;
+  font-size: 2rem;
+  color: #FF6B35;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.matching-intro p {
+  animation: fadeSlideUp 1.1s ease-out;
+  animation-delay: 0.5s;
+  animation-fill-mode: both;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.matching-intro .highlight {
+  color: #FF6B35;
+  font-weight: bold;
+}
+
+.intro-desc {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.role-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.role-toggle button,
+.back-button
+ {
+  background-color: #FF6B35;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 107, 53, 0.25);
+  transition: all 0.2s ease;
+  gap: 0.5rem;
+}
+
+.role-toggle button:hover,
+.back-button:hover
+{
+  background-color: #ff814f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(255, 107, 53, 0.35);
+}
+
+
+
+
+
+.cta-button,
+.invite-btn
+ {
+  background-color: #FF6B35;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-button:hover,
+.invite-btn:hover
+ {
+  background-color: #e85c29;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.role-toggle button:active,
+.back-button:active,
+.cta-button:active,
+.invite-btn:active
+{
+  transform: scale(0.97);
+  background-color: #c9471c;
+}
+.status-and-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: white;
+  margin-top: 5px;
+}
+
+.status-badge.open {
+  background-color: #28a745; /* 초록색 */
+}
+
+.status-badge.closed {
+  background-color: #dc3545; /* 빨간색 */
+}
+
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem 4rem;
+  gap: 3rem;
+  width: 100%;
+  max-width: 1500px;   /* ✅ 더 넓게 */
+  margin: 0 auto;
+  box-sizing: border-box;
+  flex-grow: 1;         /* 추가 */
+  align-items: stretch; /* 높이 같이 맞춤 */
+}
+
+.left-pane {
+  flex: 1 1 65%;        /* ✅ 자동 확장되도록 */
+  min-width: 500px;
+  box-sizing: border-box;
+}
+
+.right-pane {
+  flex: 1 1 35%;        /* ✅ 오른쪽도 유동적으로 */
+  min-width: 320px;
+  box-sizing: border-box;
+}
+.left-pane,
+.right-pane {
+  padding: 0.5rem;
+  overflow: visible;
+}
+
+.team-create-form,
+.my-info,
+.my-team-info {
+  width: 100%;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.2rem;
+}
+.custom-select {
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  outline: none;
+  appearance: none; /* 화살표 제거 (크롬 기준) */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8"><path fill="gray" d="M0 0l6 6 6-6z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+  background-image: none;
+}
+
+.custom-select:focus {
+  border-color: #ff6b35;
+}
+
+.team-create-form input,
+.filter-bar input {
+  display: block;
+  width: 95%;
+  margin-bottom: 0.8rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: #fff;
+  
+}
+.filter-row input {
+  width: 200px;
+  transition: all 0.2s ease-in-out;
+}
+
+.keyword-section {
+  margin-top: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.keyword-btn.selected {
+  background-color: #ff6b35;
+  color: #fff;
+  font-weight: 600;
+}
+.keyword-btn.disabled {
+  background-color: #ccc;
+  color: #777;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.keyword-btn {
+  padding: 0.5rem 1rem;
+  background-color: #eee;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.filter-bar {
+  display: flex;
+  flex-direction: column;   /* ⭐ 수직 정렬 */
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.filter-row {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-left: 2px;
+  width: 100%; /* ⭐ 슬라이더 한 줄 차지 */
+}
+
+.slider-container input[type="range"] {
+  flex: 1;
+  height: 5px;
+  accent-color: #FF6B35;
+  cursor: pointer;
+}
+
+.slider-container span {
+  font-size: 0.9rem;
+}
+
+.applicant-card,
+.room-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+  box-sizing: border-box;
+}
+
+.room-card:hover,
+.applicant-card:hover {
+  transform: translateY(-2px);
+}
+
+.my-team-info .team-detail-box {
+  background-color: #fefefe;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  margin-bottom: 1rem;
+}
+
+.my-team-info .team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.member-slot {
+  background-color: #eee;
+  padding: 0.8rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.member-slot:hover {
+  background-color: #ddd;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.right-widget-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.widget-box h4 {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.2rem;
+}
+
+.recommend-box ul {
+  padding-left: 1.2rem;
+  list-style-type: disc;
+}
+
+.recommend-box li {
+  font-size: 0.9rem;
+  margin-bottom: 0.2rem;
+  color: #222;
+}
+
+.list-scroll {
+  max-height: 700px;
+  overflow-y: auto;
+  padding-right: 1rem;
+  margin-top: 1rem;
+}
+
+.matching-desc {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.matching-desc img {
+  max-width: 100%;
+  margin: 0.8rem auto;
+  display: block;
+}
+
+.matching-desc p {
+  font-size: 1.1rem;
+  color: #444;
+  margin-top: 0.3rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-box {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.log-box {
+  background: #fdfdfd;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.log-box h4 {
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.log-entry {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.log-entry button {
+  background: #FF6B35;
+  border: none;
+  color: white;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.log-entry button:hover {
+  background: #e55c28;
+}
+.role-bar-container {
+  background-color: #eee;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0.3rem 0;
+}
+
+.role-bar {
+  background-color: #FF6B35;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+.team-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.team-member-card {
+  background-color: #FFF7F0;
+  border: 1px solid #FFAA66;
+  border-left: 6px solid #FFA500;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-size: 0.95rem;
+  
+}
+
+
+.member-header {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.member-info p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+}
+.mypage-nav-button{
+  background-color: transparent;
+  border: none;
+  color: black;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+.team-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+
+/* 시연용 버튼 */
+ .sim-accept-button, .sample-button {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 0.6rem 1rem;
+  font-size: 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  margin-left: 5px;
+
+}.mypage-button-text {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.2s;
+}
+
+.mypage-button-text:hover {
+  color: #ff6b35;
+  text-decoration: underline;
+}
+
